@@ -1,6 +1,6 @@
 import { clientBundle } from './scripts/dsh-client-preset.ts'
 
-const PLUGIN_ID = 'dsh-session-kit'
+const PLUGIN_ID = 'dsh-session-pilot'
 const clientConfig = clientBundle(PLUGIN_ID)
 
 export default () => [

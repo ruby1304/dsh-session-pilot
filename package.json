@@ -1,5 +1,5 @@
 {
-  "name": "dsh-session-kit",
+  "name": "dsh-session-pilot",
   "description": "Manage DeepSeek Harness conversations from inside a conversation: new_conversation, rename_session, list_sessions, read_session, archive_session model tools plus official-slot UI actions",
   "version": "0.1.0",
   "type": "module",
@@ -147,10 +147,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ruby1304/dsh-session-kit.git"
+    "url": "git+https://github.com/ruby1304/dsh-session-pilot.git"
   },
-  "homepage": "https://github.com/ruby1304/dsh-session-kit#readme",
+  "homepage": "https://github.com/ruby1304/dsh-session-pilot#readme",
   "bugs": {
-    "url": "https://github.com/ruby1304/dsh-session-kit/issues"
+    "url": "https://github.com/ruby1304/dsh-session-pilot/issues"
   }
 }

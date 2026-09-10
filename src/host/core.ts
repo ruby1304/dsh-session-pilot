@@ -1,6 +1,6 @@
 /**
  * Host-side core of Newchat: operation decoding, the HTTP trust fence, and
- * the single `createSessionKit` transaction shared by the model tool and the
+ * the single `createSessionPilot` transaction shared by the model tool and the
  * same-origin route. Everything goes through the official
  * `sessionController.create` / `rename` / `prompt` seam — the exact code path
  * the Web UI uses — so created conversations are ordinary durable Sessions.
@@ -13,8 +13,8 @@ import type { SessionId } from '@deepseek-ai/dsh-session'
 import type { Workspace } from '@deepseek-ai/dsh-workspace'
 import {
   MAX_REQUEST_BODY_BYTES,
-  type SessionKitOperation,
-  type SessionKitResult,
+  type SessionPilotOperation,
+  type SessionPilotResult,
 } from '../shared.ts'
 
 /** Loopback hostnames accepted by the HTTP trust fence. */
@@ -127,7 +127,7 @@ function optionalTitle(value: unknown): string | undefined {
 }
 
 /** Decode one route operation. */
-export function decodeOperation(value: unknown): SessionKitOperation {
+export function decodeOperation(value: unknown): SessionPilotOperation {
   const record = objectValue(value)
   const sourceSessionId = optionalSessionId(record['sourceSessionId'])
   switch (record['action']) {
@@ -238,7 +238,7 @@ function requireSessionController(ctx: Context): SessionControllerFace {
   return controller
 }
 
-export interface CreateSessionKitInput {
+export interface CreateSessionPilotInput {
   readonly sourceSessionId?: SessionId
   readonly cwd?: string
   readonly agentPreset?: string
@@ -255,7 +255,7 @@ export interface CreateSessionKitInput {
  * source is attached to one, same cwd otherwise. `create` already attaches
  * the workspace host-side; `rename` and `prompt` follow when requested.
  */
-export async function createSessionKit(ctx: Context, input: CreateSessionKitInput): Promise<SessionKitResult> {
+export async function createSessionPilot(ctx: Context, input: CreateSessionPilotInput): Promise<SessionPilotResult> {
   const controller = requireSessionController(ctx)
   const workspace = resolveWorkspace(ctx, input.sourceSessionId)
   const created = await controller.create(
@@ -274,7 +274,7 @@ export async function createSessionKit(ctx: Context, input: CreateSessionKitInpu
   }
   if (input.prompt !== undefined) {
     await controller.prompt({
-      requestId: input.requestId ?? `session-kit-${crypto.randomUUID()}`,
+      requestId: input.requestId ?? `session-pilot-${crypto.randomUUID()}`,
       sessionId: created.sessionId,
       // 'queue' is the follow-up admission mode on every supported version.
       mode: 'queue',

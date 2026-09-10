@@ -1,4 +1,4 @@
-# dsh-session-kit
+# dsh-session-pilot
 
 Manage conversations from inside a conversation, for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — model and human can both create, rename, list, read, and archive sessions mid-chat.
 
@@ -24,7 +24,7 @@ Official paths only: the Host half reuses the Web UI's own `sessionController` /
 ## Install
 
 ```bash
-dsh plugin add dsh-session-kit
+dsh plugin add dsh-session-pilot
 ```
 
 Restart dsh. The model then sees five tools, the session header gains a "＋ New chat" button, and every finalized assistant message gains a "⧉" action.
@@ -49,6 +49,8 @@ Restart dsh. The model then sees five tools, the session header gains a "＋ New
 
 | Plugin | Overlap | Key difference |
 | --- | --- | --- |
+| [`ltxlong/dsh-session-kit`](https://github.com/ltxlong/dsh-session-kit) | Day-to-day session management, archive management | It is **pure UI** (session management menus, archive list/restore/delete/preview, local memory, compaction config, topic navigation) with **no model tools**; every management action here is a **model-callable tool**, plus new-conversation creation. The two coexist: it owns the interface, this plugin lets the agent act |
+| [`lesterq/dsh-session-manager`](https://github.com/lesterq/dsh-session-manager) | Session delete/archive/move | Also a UI operations panel (no model tools); this plugin has the agent act directly in conversation |
 | [`yangYzc/dsh-plugin-quote-reply`](https://github.com/yangYzc/dsh-plugin-quote-reply) | Its "reply in new window" also creates a session with a quote | It is **selection-based quoting into a composer draft** (you send manually); this plugin carries a whole message as the **first admitted user message** (the new conversation starts immediately). It also has no model tool and creates client-side (no `sessionController` workspace attach) |
 | [`bpc-oss/dsh-fork-to-preset`](https://github.com/bpc-oss/dsh-fork-to-preset) | Header button creates a session | Fork semantics: **inherits completed turns** into another preset; this plugin starts zero-history |
 | [`qwert702/dsh-context-compressor`](https://github.com/qwert702/dsh-context-compressor) | Switches to a fresh session | Auto-triggered context compression; this plugin is deliberate, topic-driven creation |
@@ -58,7 +60,7 @@ Restart dsh. The model then sees five tools, the session header gains a "＋ New
 
 ## Design notes
 
-- **One transaction**: `new_conversation` and the HTTP route share `createSessionKit` — resolve the source session's workspace (direct attachment), call `sessionController.create` (the Host attaches the workspace), then optionally `rename` and `prompt` (`mode: 'queue'`, forwarding `exec.signal`). Created conversations are ordinary durable Sessions.
+- **One transaction**: `new_conversation` and the HTTP route share `createSessionPilot` — resolve the source session's workspace (direct attachment), call `sessionController.create` (the Host attaches the workspace), then optionally `rename` and `prompt` (`mode: 'queue'`, forwarding `exec.signal`). Created conversations are ordinary durable Sessions.
 - **Workspace and preset inheritance**: the new conversation lands in the source's workspace, falls back to the source `cwd`, and (tool path) inherits the source's latest `agent-preset/selected`.
 - **Reads through their own seams**: `list_sessions` uses `sessionController.list/search`; `read_session` uses `sessionQuery.readSession` (live-preferred, cold persistence reads) plus `readTitle`, with bounded message projection (≤600 chars per message, ≤100 messages, ≤12000 chars total).
 - **HTTP trust fence**: the route accepts loopback Origin/Host only (same convention as `dsh-turn-fork`), `application/json`, bodies ≤ 64 KiB.

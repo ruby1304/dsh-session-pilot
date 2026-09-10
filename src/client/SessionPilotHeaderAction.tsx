@@ -1,12 +1,12 @@
 /** Session-header action: start a blank conversation beside this one. */
 import { useState, type ReactElement } from 'react'
 import type { InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionKitFace } from './controller.ts'
+import type { SessionPilotFace } from './controller.ts'
 
-type HeaderProps = PropsRuntime<'conversation.session.header.actions'> & InjectFace<SessionKitFace>
+type HeaderProps = PropsRuntime<'conversation.session.header.actions'> & InjectFace<SessionPilotFace>
 
-export function SessionKitHeaderAction(props: HeaderProps): ReactElement {
-  const face: InjectFace<SessionKitFace> = props
+export function SessionPilotHeaderAction(props: HeaderProps): ReactElement {
+  const face: InjectFace<SessionPilotFace> = props
   const { t } = face
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -16,7 +16,7 @@ export function SessionKitHeaderAction(props: HeaderProps): ReactElement {
     setFailed(false)
     face.openBlankChat()
       .catch((error: unknown) => {
-        console.error('[dsh-session-kit] blank conversation failed:', error)
+        console.error('[dsh-session-pilot] blank conversation failed:', error)
         setFailed(true)
       })
       .finally(() => { setBusy(false) })

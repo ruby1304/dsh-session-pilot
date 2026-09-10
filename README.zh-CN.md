@@ -1,4 +1,4 @@
-# dsh-session-kit
+# dsh-session-pilot
 
 为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 补上"在对话中管理会话"的能力——模型与人都能在对话途中新建、重命名、列出、查看、归档会话。
 
@@ -24,7 +24,7 @@
 ## 安装
 
 ```bash
-dsh plugin add dsh-session-kit
+dsh plugin add dsh-session-pilot
 ```
 
 重启 dsh 后生效。模型会在工具列表里看到五个工具；会话头部出现「＋ 新对话」按钮；每条已落定的助手消息的操作区出现「⧉」按钮。
@@ -49,6 +49,8 @@ dsh plugin add dsh-session-kit
 
 | 插件 | 重叠点 | 关键差别 |
 | --- | --- | --- |
+| [`ltxlong/dsh-session-kit`](https://github.com/ltxlong/dsh-session-kit) | 会话日常管理、归档管理 | 它是**纯 UI 驱动**（会话管理菜单、归档 list/restore/delete/preview、本地记忆、压缩配置、话题导航），**没有模型工具**；本插件的管理动作全部是**模型可调用的工具**，并多出新对话创建。两者可共存：它管界面，本插件让模型动手 |
+| [`lesterq/dsh-session-manager`](https://github.com/lesterq/dsh-session-manager) | 会话删除/归档/移动 | 同样是 UI 操作面板（无模型工具）；本插件是模型在对话中直接执行 |
 | [`yangYzc/dsh-plugin-quote-reply`](https://github.com/yangYzc/dsh-plugin-quote-reply) | 「新窗口回复」也会创建新会话并带入引用 | 它是**划词引用 + 预填输入框草稿**（用户手动发送）；本插件是整条消息摘录**直接落为首条消息**（新对话立即开跑）。且它无模型工具、纯 client 创建（不经 `sessionController` 的工作区挂载） |
 | [`bpc-oss/dsh-fork-to-preset`](https://github.com/bpc-oss/dsh-fork-to-preset) | 头部按钮创建新会话 | fork 语义：**继承已完成回合**并换 preset；本插件是零历史新对话 |
 | [`qwert702/dsh-context-compressor`](https://github.com/qwert702/dsh-context-compressor) | 自动切到新会话 | 目的是压缩上下文、自动触发；本插件是模型/用户**主动**按话题拆分 |
@@ -58,7 +60,7 @@ dsh plugin add dsh-session-kit
 
 ## 设计说明
 
-- **单一事务**：`new_conversation` 与 HTTP 路由共享 `createSessionKit`——解析来源会话的工作区（直连挂载），调用 `sessionController.create`（Host 侧自动完成工作区挂载），再按需 `rename` 与 `prompt`（`mode: 'queue'`，透传 `exec.signal`）。创建的会话就是普通的耐久 Session，重启后仍在。
+- **单一事务**：`new_conversation` 与 HTTP 路由共享 `createSessionPilot`——解析来源会话的工作区（直连挂载），调用 `sessionController.create`（Host 侧自动完成工作区挂载），再按需 `rename` 与 `prompt`（`mode: 'queue'`，透传 `exec.signal`）。创建的会话就是普通的耐久 Session，重启后仍在。
 - **工作区与 preset 继承**：新对话落在来源会话的工作区；未挂载时退化为继承 `cwd`；Agent preset 随来源会话的最近 `agent-preset/selected` 继承（工具路径）。
 - **只读走独立接缝**：`list_sessions` 用 `sessionController.list/search`；`read_session` 用 `sessionQuery.readSession`（live 优先、冷读持久层）+ `readTitle`，消息级投影有界（每条 ≤600 字符、最多 100 条、总量 ≤12000 字符）。
 - **HTTP 信任围栏**：路由仅接受回环 Origin/Host（与 `dsh-turn-fork` 同一约定），`application/json` 且正文 ≤ 64 KiB。

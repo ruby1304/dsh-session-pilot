@@ -3,18 +3,18 @@
  * node:test suite drives exactly what the bundles ship.
  */
 export {
-  SESSION_KIT_PATH,
+  SESSION_PILOT_PATH,
   MAX_REQUEST_BODY_BYTES,
   MAX_EXCERPT_CHARS,
   boundedExcerpt,
   composeContinuePrompt,
 } from './shared.ts'
-export type { SessionKitOperation, SessionKitResult, SessionKitLocaleKey } from './shared.ts'
+export type { SessionPilotOperation, SessionPilotResult, SessionPilotLocaleKey } from './shared.ts'
 export {
   BodyTooLargeError,
   archiveSession,
   callerContext,
-  createSessionKit,
+  createSessionPilot,
   decodeOperation,
   isTrustedRequest,
   listSessions,

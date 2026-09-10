@@ -10,9 +10,9 @@
  */
 import { useState, type ReactElement } from 'react'
 import type { InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionKitFace } from './controller.ts'
+import type { SessionPilotFace } from './controller.ts'
 
-type AssistantActionsProps = PropsRuntime<'conversation.chat.assistant-actions'> & InjectFace<SessionKitFace>
+type AssistantActionsProps = PropsRuntime<'conversation.chat.assistant-actions'> & InjectFace<SessionPilotFace>
 
 interface ChatTextBlock {
   readonly kind: string
@@ -36,8 +36,8 @@ function isTextBlock(block: ChatTextBlock): block is ChatTextBlock & { readonly 
   return block.kind === 'text' && typeof block.text === 'string'
 }
 
-export function ContinueInSessionKitAction(props: AssistantActionsProps): ReactElement | null {
-  const face: InjectFace<SessionKitFace> = props
+export function ContinueInSessionPilotAction(props: AssistantActionsProps): ReactElement | null {
+  const face: InjectFace<SessionPilotFace> = props
   const { t } = face
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -59,7 +59,7 @@ export function ContinueInSessionKitAction(props: AssistantActionsProps): ReactE
     setFailed(false)
     face.continueFromText(text)
       .catch((error: unknown) => {
-        console.error('[dsh-session-kit] continue-in-new-chat failed:', error)
+        console.error('[dsh-session-pilot] continue-in-new-chat failed:', error)
         setFailed(true)
       })
       .finally(() => { setBusy(false) })

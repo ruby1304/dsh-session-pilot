@@ -4,7 +4,7 @@
  */
 
 /** Same-origin endpoint owned by the Newchat host plugin. */
-export const SESSION_KIT_PATH = '/session-kit'
+export const SESSION_PILOT_PATH = '/session-pilot'
 
 /** Request bodies are tiny operations; 64 KiB is generous and bounds memory. */
 export const MAX_REQUEST_BODY_BYTES = 65536
@@ -16,35 +16,35 @@ export const MAX_REQUEST_BODY_BYTES = 65536
 export const MAX_EXCERPT_CHARS = 4000
 
 /** Create an empty conversation beside the source session. */
-export interface SessionKitBlankOperation {
+export interface SessionPilotBlankOperation {
   readonly action: 'blank'
   readonly sourceSessionId?: string
 }
 
 /** Create a conversation and immediately admit one seeded first user message. */
-export interface SessionKitContinueOperation {
+export interface SessionPilotContinueOperation {
   readonly action: 'continue'
   readonly sourceSessionId?: string
   readonly prompt: string
   readonly title?: string
 }
 
-export type SessionKitOperation = SessionKitBlankOperation | SessionKitContinueOperation
+export type SessionPilotOperation = SessionPilotBlankOperation | SessionPilotContinueOperation
 
 /** Successful host-side creation result, also the tool's canonical value. */
-export interface SessionKitResult {
+export interface SessionPilotResult {
   readonly sessionId: string
   readonly title?: string
   readonly workspaceId?: string
 }
 
 /** Wire error body. */
-export interface SessionKitError {
+export interface SessionPilotError {
   readonly error: string
 }
 
-/** Locale dictionary keys owned by this plugin (namespace `session-kit`). */
-export type SessionKitLocaleKey =
+/** Locale dictionary keys owned by this plugin (namespace `session-pilot`). */
+export type SessionPilotLocaleKey =
   | 'headerBlank'
   | 'headerBlankTitle'
   | 'continueTitle'
@@ -53,7 +53,7 @@ export type SessionKitLocaleKey =
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    'session-kit': SessionKitLocaleKey
+    'session-pilot': SessionPilotLocaleKey
   }
 }
 

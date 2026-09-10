@@ -9,7 +9,7 @@
  * - `read_session` — read a compact transcript of one conversation;
  * - `archive_session` — archive a conversation out of its workspace list.
  *
- * Plus a same-origin, trust-fenced `/session-kit` route the Client half's
+ * Plus a same-origin, trust-fenced `/session-pilot` route the Client half's
  * official slot buttons call for blank and excerpt-seeded creation.
  *
  * Everything runs through official seams — `sessionController.create` /
@@ -25,15 +25,15 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { SessionId } from '@deepseek-ai/dsh-session'
 import type { SessionId as SessionIdType } from '@deepseek-ai/dsh-session'
 import {
-  SESSION_KIT_PATH,
-  type SessionKitError,
-  type SessionKitResult,
+  SESSION_PILOT_PATH,
+  type SessionPilotError,
+  type SessionPilotResult,
 } from './shared.ts'
 import {
   BodyTooLargeError,
   archiveSession,
   callerContext,
-  createSessionKit,
+  createSessionPilot,
   decodeOperation,
   isTrustedRequest,
   listSessions,
@@ -49,7 +49,7 @@ import {
 } from './host/core.ts'
 
 /** Stable Cordis plugin name. */
-export const name = 'session-kit'
+export const name = 'session-pilot'
 
 /**
  * Hard dependency: the tool registry. The webServer and workspaceRegistry
@@ -135,7 +135,7 @@ function newConversationTool(ctx: Context): ToolDefinition {
     async execute(args, exec) {
       const parsed = parseNewConversationArgs(args)
       const caller = callerContext(exec.agent)
-      const result: SessionKitResult = await createSessionKit(ctx, {
+      const result: SessionPilotResult = await createSessionPilot(ctx, {
         ...caller.sessionId === undefined ? {} : { sourceSessionId: caller.sessionId },
         ...caller.cwd === undefined ? {} : { cwd: caller.cwd },
         ...caller.agentPreset === undefined ? {} : { agentPreset: caller.agentPreset },
@@ -341,7 +341,7 @@ function respondJson(response: ServerResponse, status: number, value: unknown): 
 }
 
 function respondError(response: ServerResponse, status: number, error: unknown): void {
-  const body: SessionKitError = { error: error instanceof Error ? error.message : String(error) }
+  const body: SessionPilotError = { error: error instanceof Error ? error.message : String(error) }
   respondJson(response, status, body)
 }
 
@@ -364,7 +364,7 @@ async function handleRoute(
     const contentType = String(request.headers['content-type'] ?? '').split(';')[0]?.trim().toLowerCase()
     if (contentType !== 'application/json') throw new TypeError('POST must carry application/json.')
     const operation = decodeOperation(await readJsonBody(request))
-    const result = await createSessionKit(ctx, {
+    const result = await createSessionPilot(ctx, {
       ...operation.sourceSessionId === undefined
         ? {}
         : { sourceSessionId: SessionId(operation.sourceSessionId) },
@@ -394,7 +394,7 @@ export function apply(ctx: Context): void {
     const webServer = webCtx.webServer
     return webServer.register({
       kind: 'exact',
-      path: SESSION_KIT_PATH,
+      path: SESSION_PILOT_PATH,
       handler: (request, response) => handleRoute(webCtx, webServer, request, response),
     })
   })
@@ -404,12 +404,12 @@ export {
   boundedExcerpt,
   composeContinuePrompt,
   MAX_EXCERPT_CHARS,
-  SESSION_KIT_PATH,
+  SESSION_PILOT_PATH,
 } from './shared.ts'
 export {
   archiveSession,
   callerContext,
-  createSessionKit,
+  createSessionPilot,
   decodeOperation,
   isTrustedRequest,
   listSessions,

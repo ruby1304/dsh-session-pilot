@@ -1,4 +1,4 @@
-/** Pure-helper and package-contract tests for dsh-session-kit. */
+/** Pure-helper and package-contract tests for dsh-session-pilot. */
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
@@ -196,13 +196,13 @@ test('package contract: bundle patch, client export, plugin keyword', async () =
   assert.equal(pkg.exports['./cordis.patch.yml'], './cordis.patch.yml')
 
   const patch = await readFile(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
-  assert.ok(patch.includes('id: session-kit'))
-  assert.ok(patch.includes('name: dsh-session-kit'))
+  assert.ok(patch.includes('id: session-pilot'))
+  assert.ok(patch.includes('name: dsh-session-pilot'))
 })
 
 test('built host bundle exposes the cordis plugin shape', async () => {
   const host = await import('../index.mjs')
-  assert.equal(host.name, 'session-kit')
+  assert.equal(host.name, 'session-pilot')
   assert.deepEqual(host.inject, ['tools'])
   assert.equal(typeof host.apply, 'function')
 })
