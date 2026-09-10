@@ -1,0 +1,17 @@
+schemaVersion: 1
+name: dsh-session-kit-quick
+subject:
+  source: .
+dsh:
+  version: 0.1.2-alpha.4
+expect:
+  boot: success
+  rows:
+    - session-kit
+  services: []
+  tools:
+    - new_conversation
+    - rename_session
+    - list_sessions
+    - read_session
+    - archive_session
