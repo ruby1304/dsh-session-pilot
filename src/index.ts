@@ -411,6 +411,7 @@ export {
   callerContext,
   createSessionPilot,
   decodeOperation,
+  inheritPermissionPreset,
   isTrustedRequest,
   listSessions,
   parseArchiveSessionArgs,
