@@ -6,6 +6,7 @@ import {
   boundedExcerpt,
   composeContinuePrompt,
   decodeOperation,
+  inheritPermissionPreset,
   isTrustedRequest,
   parseArchiveSessionArgs,
   parseListSessionsArgs,
@@ -205,4 +206,60 @@ test('built host bundle exposes the cordis plugin shape', async () => {
   assert.equal(host.name, 'session-pilot')
   assert.deepEqual(host.inject, ['tools'])
   assert.equal(typeof host.apply, 'function')
+})
+
+/** Minimal Context stand-in exposing only the two optional services under test. */
+function fakeContext({ presets, sessions } = {}) {
+  return {
+    get: (name) => (name === 'permissionPresets' ? presets : name === 'sessions' ? sessions : undefined),
+  }
+}
+
+function fakeRegistry(presetName, { throws = false } = {}) {
+  const calls = []
+  return {
+    calls,
+    current: () => presetName,
+    set: (session, name) => {
+      if (throws) throw new Error('unknown preset')
+      calls.push({ session, name })
+    },
+  }
+}
+
+test('inheritPermissionPreset copies the source preset onto the new session', () => {
+  const preset = fakeRegistry('danger-full-access')
+  const source = { id: 'source' }
+  const target = { id: 'target' }
+  const sessions = { get: (id) => (id === 'source' ? source : id === 'target' ? target : undefined) }
+  const ctx = fakeContext({ presets: preset, sessions })
+
+  assert.equal(inheritPermissionPreset(ctx, 'source', 'target'), 'danger-full-access')
+  assert.deepEqual(preset.calls, [{ session: target, name: 'danger-full-access' }])
+})
+
+test('inheritPermissionPreset leaves the default alone for a custom knob state', () => {
+  const preset = fakeRegistry('custom')
+  const ctx = fakeContext({ presets: preset, sessions: { get: () => ({}) } })
+
+  assert.equal(inheritPermissionPreset(ctx, 'source', 'target'), undefined)
+  assert.deepEqual(preset.calls, [])
+})
+
+test('inheritPermissionPreset tolerates missing services, unknown sessions, and set failures', () => {
+  assert.equal(inheritPermissionPreset(fakeContext({}), 'source', 'target'), undefined)
+  assert.equal(inheritPermissionPreset(fakeContext({ presets: fakeRegistry('x') }), 'source', 'target'), undefined)
+  assert.equal(
+    inheritPermissionPreset(fakeContext({ presets: fakeRegistry('x'), sessions: { get: () => undefined } }), 'source', 'target'),
+    undefined,
+  )
+  const failing = fakeRegistry('danger-full-access', { throws: true })
+  assert.equal(
+    inheritPermissionPreset(fakeContext({ presets: failing, sessions: { get: () => ({}) } }), 'source', 'target'),
+    undefined,
+  )
+  // A creation with no calling session has nothing to inherit from.
+  const unused = fakeRegistry('danger-full-access')
+  assert.equal(inheritPermissionPreset(fakeContext({ presets: unused, sessions: { get: () => ({}) } }), undefined, 'target'), undefined)
+  assert.deepEqual(unused.calls, [])
 })
